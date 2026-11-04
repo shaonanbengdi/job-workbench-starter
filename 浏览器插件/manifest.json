@@ -1,0 +1,104 @@
+{
+  "manifest_version": 3,
+  "name": "岗位速存 · 求职工作台",
+  "short_name": "岗位速存",
+  "version": "1.3.8",
+  "description": "一键把当前页面的岗位抓成求职工作台的岗位卡片：自动填好岗位名、公司、薪资、地点、学历经验、JD 与投递链接，并做重复检测。",
+  "minimum_chrome_version": "102",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "http://127.0.0.1:8765/*",
+    "http://127.0.0.1:8766/*",
+    "http://127.0.0.1:8767/*",
+    "http://127.0.0.1:8768/*",
+    "http://127.0.0.1:8769/*",
+    "http://127.0.0.1:8770/*",
+    "http://127.0.0.1:8771/*",
+    "http://127.0.0.1:8772/*",
+    "http://127.0.0.1:8773/*",
+    "http://127.0.0.1:8774/*",
+    "http://127.0.0.1:8775/*",
+    "http://127.0.0.1:8776/*",
+    "http://127.0.0.1:8777/*",
+    "http://127.0.0.1:8778/*",
+    "http://127.0.0.1:8779/*",
+    "http://127.0.0.1:8780/*",
+    "http://127.0.0.1:8781/*",
+    "http://127.0.0.1:8782/*",
+    "http://127.0.0.1:8783/*",
+    "http://127.0.0.1:8784/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "岗位速存（Alt+Shift+J）",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "capture-job": {
+      "suggested_key": {
+        "default": "Alt+Shift+J"
+      },
+      "description": "抓取当前页面的岗位信息"
+    },
+    "filter-jobs": {
+      "suggested_key": {
+        "default": "Alt+Shift+F"
+      },
+      "description": "按求职目标筛出本页合适的岗位"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "exclude_matches": [
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ],
+      "js": [
+        "lib/job-parser.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "lib/job-parser.js",
+        "content.css"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}

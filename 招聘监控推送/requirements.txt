@@ -1,0 +1,6 @@
+# 招聘信息监控推送 — 依赖清单
+# 安装：pip install -r requirements.txt
+# 国内网络慢可换镜像：
+#   pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple
+
+requests>=2.31.0    # 调用 91job 接口与企业微信 Webhook

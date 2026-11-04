@@ -1,0 +1,479 @@
+/* ============================================================================
+ * content.css —— 页面内浮层样式
+ *
+ * 原则（对应工作台的视觉约定）：
+ *   · 只给浮层自己加样式，选择器统一 jc- 前缀，绝不去动宿主页面的样式。
+ *   · z-index 取一个很高但非极限的值，避免和站点自己的遮罩打架。
+ *   · 浅色主题（与工作台 index.html 同一套色板）。
+ * ==========================================================================*/
+
+/* 常驻小工具栏：两个动作竖着排（存岗位 / 筛岗位），整块可拖动。
+ * 以前是一个大蓝药丸，按页面形态换文字 —— 判定一错就找不到该点的功能，
+ * 而且那一坨实色压在招聘页面上确实难看。现在改成白底细边的小药丸。 */
+.jc-fab {
+  position: fixed;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .86);
+  border: 1px solid rgba(148, 163, 184, .38);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, .14);
+  backdrop-filter: blur(6px);
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  transition: box-shadow .14s ease, transform .14s ease;
+}
+.jc-fab:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(15, 23, 42, .2); }
+.jc-fab.jc-dragging { cursor: grabbing; transform: scale(1.03); }
+.jc-fab.jc-busy { cursor: progress; }
+
+.jc-dock-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #fff;
+  color: #475569;
+  font: 600 12.5px/1 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .14s ease, color .14s ease, border-color .14s ease;
+}
+.jc-dock-btn svg { flex: 0 0 auto; }
+.jc-dock-btn:hover { background: #f1f5f9; color: #0f172a; }
+.jc-dock-btn:focus { outline: 2px solid #93c5fd; outline-offset: 1px; }
+
+/* 当前页面形态下更该点的那个：给一点底色，但不上实色块 */
+.jc-dock-capture.jc-dock-primary { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; }
+.jc-dock-capture.jc-dock-primary:hover { background: #dbeafe; }
+.jc-dock-filter.jc-dock-primary  { color: #7c3aed; border-color: #ddd6fe; background: #f5f3ff; }
+.jc-dock-filter.jc-dock-primary:hover { background: #ede9fe; }
+
+/* 抓取/筛选进行中：只让正在干活的那一个图标转起来，另一个照旧可用 */
+.jc-dock-btn.jc-dock-busy { color: #94a3b8; }
+.jc-dock-btn.jc-dock-busy svg { animation: jc-spin .9s linear infinite; }
+@keyframes jc-spin { to { transform: rotate(360deg); } }
+
+.jc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483400;
+  background: rgba(15, 23, 42, .42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font: 13px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #0f172a;
+}
+.jc-panel {
+  width: 100%;
+  max-width: 620px;
+  max-height: 88vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, .3);
+  display: flex;
+  flex-direction: column;
+}
+.jc-head {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+}
+.jc-head-main { flex: 1; min-width: 0; }
+.jc-head-title { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.jc-head-sub { margin-top: 3px; font-size: 11.5px; color: #64748b; word-break: break-all; }
+.jc-x { border: 0; background: transparent; color: #94a3b8; font-size: 15px; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+.jc-x:hover { background: #f1f5f9; color: #334155; }
+
+.jc-conf { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.jc-conf-high { color: #15803d; background: #dcfce7; }
+.jc-conf-mid  { color: #b45309; background: #fef3c7; }
+.jc-conf-low  { color: #b91c1c; background: #fee2e2; }
+
+.jc-warn {
+  margin: 12px 16px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #7c2d12;
+}
+.jc-warn-dup { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
+.jc-warn-sim { background: #fffbeb; border-color: #fde68a; color: #78350f; }
+.jc-warn .jc-btn { margin-top: 8px; margin-right: 8px; }
+.jc-dup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.jc-form { padding: 6px 16px 4px; }
+
+/* ---------------- 实时预览：按工作台岗位行的真实长相画一张 --------------- */
+.jc-preview-wrap { padding: 2px 16px 0; }
+.jc-preview-head {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: #334155;
+}
+.jc-preview-head .jc-preview-note {
+  margin-left: auto; font-size: 10.5px; font-weight: 400; color: #94a3b8;
+}
+/* 外层模拟工作台卡片白底 + 边框 + 阴影 */
+.jc-preview-card {
+  margin-top: 6px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  background: #fff; box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+  overflow: hidden;
+}
+/* 表头，跟工作台岗位表对齐 */
+.jc-preview-tr-head {
+  display: flex; gap: 10px;
+  padding: 7px 12px;
+  background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+  font-size: 11px; font-weight: 600; color: #64748b;
+}
+.jc-preview-tr {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 9px 12px;
+}
+.jc-preview-c-title { flex: 1 1 auto; min-width: 0; }
+.jc-preview-c-imp   { flex: 0 0 74px; }
+.jc-preview-c-tags  { flex: 0 0 96px; }
+.jc-preview-c-time  { flex: 0 0 96px; font-size: 11.5px; color: #94a3b8; }
+
+/* 插件来源角标：跟工作台 .tag.cyan 同色 */
+.jc-pv-badge {
+  display: inline-block; vertical-align: 1px;
+  padding: 1px 7px; margin-right: 4px; border-radius: 9px;
+  background: #cffafe; color: #0e7490;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.jc-pv-title {
+  display: inline; font-size: 13.5px; font-weight: 600; color: #0f172a;
+  word-break: break-word;
+}
+.jc-pv-title.jc-pv-placeholder { color: #cbd5e1; font-weight: 400; }
+/* 城市 · 薪资 · 学历 那一行 */
+.jc-pv-meta {
+  margin-top: 3px; font-size: 11.5px; color: #64748b;
+  word-break: break-word;
+}
+.jc-pv-meta .jc-pv-sep { color: #cbd5e1; padding: 0 3px; }
+/* 重要程度 / 标签 pill */
+.jc-pv-pill {
+  display: inline-block; padding: 2px 8px; border-radius: 9px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.jc-pv-pill-focus { background: #fee2e2; color: #b91c1c; }
+.jc-pv-pill-can   { background: #dbeafe; color: #1d4ed8; }
+.jc-pv-pill-hold  { background: #fef3c7; color: #b45309; }
+.jc-pv-pill-skip  { background: #f1f5f9; color: #64748b; }
+.jc-pv-tag {
+  display: inline-block; padding: 1px 7px; margin: 0 3px 3px 0;
+  border: 1px solid #e2e8f0; border-radius: 9px;
+  font-size: 11px; color: #64748b;
+}
+.jc-pv-empty { color: #cbd5e1; }
+
+/* 关键字段一览（预览卡下方的小表） */
+.jc-preview-kv {
+  display: grid; grid-template-columns: 76px 1fr;
+  gap: 3px 10px; padding: 8px 12px;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 12px; color: #334155;
+}
+.jc-preview-kv dt { color: #94a3b8; }
+.jc-preview-kv dd { margin: 0; word-break: break-word; }
+
+/* JD 摘要 */
+.jc-preview-jd {
+  padding: 8px 12px; border-top: 1px dashed #e2e8f0;
+  font-size: 12px; line-height: 1.6; color: #475569;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 96px; overflow: hidden;
+}
+.jc-preview-jd-label {
+  display: block; margin-bottom: 3px;
+  font-size: 11px; font-weight: 600; color: #94a3b8;
+}
+
+.jc-row { margin: 10px 0; }
+.jc-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;
+}
+.jc-req { color: #dc2626; font-style: normal; }
+.jc-score { margin-left: auto; font-size: 10.5px; font-weight: 500; padding: 1px 7px; border-radius: 9px; }
+.jc-score-ok    { color: #15803d; background: #dcfce7; }
+.jc-score-low   { color: #b45309; background: #fef3c7; }
+.jc-score-empty { color: #94a3b8; background: #f1f5f9; }
+.jc-row-low .jc-input { border-color: #fbbf24; background: #fffdf5; }
+.jc-row-empty .jc-input { border-color: #e2e8f0; }
+
+.jc-input {
+  width: 100%; box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font: 13px/1.5 inherit;
+  color: #0f172a;
+  background: #fff;
+}
+.jc-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.jc-textarea { resize: vertical; font-family: ui-monospace, Consolas, "Microsoft YaHei", monospace; font-size: 12.5px; }
+.jc-jd-preview {
+  max-height: 220px; overflow: auto; white-space: pre-wrap;
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px;
+  padding: 10px; font-size: 12.5px;
+}
+.jc-mini {
+  border: 1px solid #cbd5e1; background: #fff; color: #475569;
+  font-size: 11px; padding: 1px 8px; border-radius: 10px; cursor: pointer;
+}
+.jc-mini:hover { background: #f1f5f9; }
+
+.jc-hint { margin: 10px 16px 0; font-size: 12px; color: #64748b; }
+.jc-hint-warn { color: #b45309; background: #fffbeb; border: 1px solid #fde68a; padding: 8px 10px; border-radius: 7px; }
+
+.jc-foot {
+  position: sticky; bottom: 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+}
+.jc-foot-gap { flex: 1; }
+.jc-check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; cursor: pointer; }
+
+.jc-btn {
+  padding: 7px 14px; border-radius: 7px; border: 1px solid #cbd5e1;
+  background: #fff; color: #334155; font: 600 13px/1.2 inherit; cursor: pointer;
+}
+.jc-btn:hover { background: #f8fafc; }
+.jc-btn:disabled { opacity: .55; cursor: not-allowed; }
+.jc-btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+.jc-btn-primary:hover { background: #1d4ed8; }
+.jc-btn-ghost { border-color: #fdba74; color: #9a3412; background: #fff7ed; }
+
+/* AI 补全按钮：紫色系，跟保存按钮区分开 */
+.jc-btn-ai {
+  border-color: #c4b5fd;
+  color: #6d28d9;
+  background: #f5f3ff;
+}
+.jc-btn-ai:hover:not(:disabled) { background: #ede9fe; border-color: #a78bfa; }
+.jc-btn-ai:disabled { opacity: .6; cursor: default; }
+
+/* 「让 AI 重抽一遍」用描边样式：它是次要动作，主按钮留给「保存」 */
+.jc-btn-ai-ghost {
+  border-color: #ddd6fe;
+  color: #7c3aed;
+  background: #fff;
+}
+.jc-btn-ai-ghost:hover:not(:disabled) { background: #f5f3ff; }
+.jc-btn-ai-ghost:disabled { opacity: .6; cursor: default; }
+
+/* AI 全量识别：紫色实心标识 */
+.jc-conf-ai { color: #6d28d9; background: #ede9fe; }
+
+/* AI 全量识别的等待浮层：整页遮罩 + 转圈，别让用户对着没反应的按钮猜 */
+.jc-aiwait {
+  position: fixed; inset: 0; z-index: 2147483600;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 23, 42, .38);
+  backdrop-filter: blur(1.5px);
+}
+.jc-aiwait-card {
+  width: 320px; padding: 22px 20px 18px;
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .28);
+  text-align: center;
+  font: 13px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #0f172a;
+}
+.jc-aiwait-spin {
+  width: 30px; height: 30px; margin: 0 auto 12px;
+  border: 3px solid #ddd6fe;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: jc-spin .8s linear infinite;
+}
+@keyframes jc-spin { to { transform: rotate(360deg); } }
+.jc-aiwait-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.jc-aiwait-tip { color: #7c3aed; min-height: 21px; }
+.jc-aiwait-sub { color: #94a3b8; font-size: 12px; margin: 4px 0 12px; }
+.jc-aiwait-card .jc-btn { width: 100%; }
+
+/* ---------------- 列表页筛选的结果标记 ----------------
+ * 要点：只加边框和一块背景，不改元素的盒模型（不动 width/position），
+ * 免得把人家 flex/grid 的列表排版撑歪。 */
+.jc-row-hit,
+.jc-row-maybe {
+  outline: 2px solid #16a34a;
+  outline-offset: 1px;
+  border-radius: 6px;
+  background-clip: padding-box;
+}
+.jc-row-hit   { background-color: rgba(22, 163, 74, .07); }
+.jc-row-maybe { outline-color: #d97706; background-color: rgba(217, 119, 6, .06); }
+
+/* 「下一个」跳过去时闪一下，长列表里才看得见落点 */
+.jc-row-flash {
+  outline-width: 3px !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .25);
+  transition: box-shadow .15s ease-out;
+}
+
+.jc-hit-badge {
+  display: inline-block; vertical-align: middle;
+  margin-right: 6px; padding: 1px 7px;
+  border-radius: 9px; font-size: 11px; font-weight: 600;
+  white-space: nowrap; line-height: 1.7;
+  cursor: help;
+}
+.jc-hit-badge-strong { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+.jc-hit-badge-maybe  { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+
+.jc-filter-bar {
+  position: fixed; left: 16px; bottom: 16px; z-index: 2147483600;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: #fff; border: 1px solid #cbd5e1; border-radius: 10px;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, .18);
+  font: 12.5px/1.4 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #334155;
+}
+.jc-filter-bar-txt { font-weight: 600; }
+
+/* ---------------- 公司与岗位解读 ---------------- */
+.jc-panel-insight { max-width: 640px; }
+.jc-insight-body { padding: 12px 16px 4px; }
+.jc-insight-sec { margin-bottom: 14px; }
+.jc-insight-sec-t {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: #0f172a;
+  margin-bottom: 6px;
+}
+.jc-insight-p {
+  margin: 0; font-size: 13px; line-height: 1.8; color: #334155;
+  word-break: break-word; white-space: pre-wrap;
+}
+.jc-insight-who {
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; line-height: 1.8; color: #1e3a8a;
+}
+.jc-insight-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.jc-insight-chip {
+  padding: 2px 9px; border-radius: 9px;
+  border: 1px solid #e2e8f0; background: #f8fafc;
+  font-size: 12px; line-height: 1.7; color: #334155;
+}
+.jc-insight-chip-co      { background: #ecfeff; border-color: #a5f3fc; color: #0e7490; }
+.jc-insight-chip-hard    { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+.jc-insight-chip-skill   { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+.jc-insight-chip-implicit{ background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+.jc-insight-note {
+  margin-left: auto; padding: 1px 8px; border-radius: 9px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.jc-insight-note-ok   { background: #dcfce7; color: #15803d; }
+.jc-insight-note-mid  { background: #fef3c7; color: #b45309; }
+.jc-insight-note-warn { background: #fee2e2; color: #b91c1c; }
+.jc-insight-list {
+  margin: 0; padding-left: 20px;
+  font-size: 13px; line-height: 1.85; color: #334155;
+}
+.jc-insight-list li { margin-bottom: 3px; }
+.jc-insight-disclaimer {
+  margin-top: 14px; padding-top: 10px;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 11.5px; color: #94a3b8; line-height: 1.7;
+}
+.jc-insight-empty { font-size: 13px; color: #94a3b8; padding: 8px 0; }
+.jc-insight-wait { display: flex; align-items: flex-start; gap: 12px; padding: 18px 16px 10px; }
+.jc-insight-spin { margin: 0; flex: 0 0 auto; }
+.jc-insight-wait-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.jc-insight-wait-tip { font-size: 12.5px; color: #7c3aed; min-height: 21px; }
+.jc-insight-wait-sub { font-size: 12px; color: #94a3b8; }
+.jc-insight-foot-tip { font-size: 11.5px; color: #94a3b8; }
+
+/* 设置面板略窄 */
+.jc-panel-sm { width: 460px; }
+
+/* 连不上工作台的自检面板：把现场信息 + 排查步骤一次摆清楚，
+   免得用户对着「连不上」三个字反复试。 */
+.jc-connhelp {
+  position: fixed; inset: 0; z-index: 2147483600;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 23, 42, .38);
+  backdrop-filter: blur(1.5px);
+}
+.jc-connhelp-card {
+  width: 480px; max-width: calc(100vw - 32px);
+  max-height: 82vh; overflow: auto;
+  padding: 20px 22px 16px;
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .28);
+  font: 13px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #0f172a;
+}
+.jc-connhelp-title { font-size: 15px; font-weight: 600; color: #b91c1c; }
+.jc-connhelp-sub { color: #64748b; font-size: 12px; margin: 3px 0 14px; }
+.jc-connhelp-tbl {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 8px 10px; margin-bottom: 14px;
+}
+.jc-connhelp-row { display: flex; gap: 8px; padding: 2px 0; }
+.jc-connhelp-k { flex: 0 0 72px; color: #64748b; font-size: 12px; }
+.jc-connhelp-v {
+  flex: 1 1 auto; color: #0f172a; font-size: 12px;
+  font-family: ui-monospace, Consolas, monospace;
+  word-break: break-all;
+}
+.jc-connhelp-steps { display: flex; flex-direction: column; gap: 8px; }
+.jc-connhelp-step { display: flex; gap: 8px; align-items: flex-start; }
+.jc-connhelp-num {
+  flex: 0 0 18px; height: 18px; line-height: 18px; text-align: center;
+  background: #e2e8f0; color: #475569; border-radius: 50%;
+  font-size: 11px; font-weight: 600; margin-top: 2px;
+}
+.jc-connhelp-txt { flex: 1 1 auto; color: #334155; font-size: 12.5px; }
+.jc-connhelp-foot {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9;
+}
+
+.jc-hint-ok { color: #15803d; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 10px; border-radius: 7px; }
+.jc-select {
+  width: 100%; box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1; border-radius: 7px;
+  font: 13px/1.5 inherit; color: #0f172a; background: #fff;
+}
+.jc-select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+.jc-toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px);
+  z-index: 2147483600;
+  max-width: 460px;
+  padding: 10px 16px; border-radius: 9px;
+  background: #0f172a; color: #fff;
+  font: 13px/1.5 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, .35);
+  opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+}
+.jc-toast.jc-show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.jc-toast.success { background: #15803d; }
+.jc-toast.error { background: #b91c1c; }
+.jc-toast-link { color: #bfdbfe; text-decoration: underline; margin-left: 4px; }
